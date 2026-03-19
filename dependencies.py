@@ -3,7 +3,7 @@ from models import db
 from sqlalchemy.orm import sessionmaker, Session
 from models import Usuario
 from jose import jwt, JWTError
-from main import SECRET_KEY, ALGORITM
+from main import SECRET_KEY, ALGORITM, oauth2_schema
 
 async def pegar_sessao():
     try: 
@@ -13,10 +13,10 @@ async def pegar_sessao():
     finally: 
         session.close()
 
-async def verificar_token(token, session: Session=Depends(pegar_sessao)):
+async def verificar_token(token: str = Depends(oauth2_schema), session: Session=Depends(pegar_sessao)):
     try:
         dic_info = jwt.decode(token, SECRET_KEY, ALGORITM)    #verificar se tolken é valido
-        id_usuario = dic_info.get("sub")
+        id_usuario = int(dic_info.get("sub"))
     except JWTError:
         raise HTTPException(status_code=401, detail="Acesso negado, verifique a validade do token")
     
